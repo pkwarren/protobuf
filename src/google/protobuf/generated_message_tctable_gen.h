@@ -38,6 +38,8 @@ struct PROTOBUF_EXPORT TailCallTableInfo {
   struct MessageOptions {
     bool is_lite;
     bool uses_codegen;
+    // TODO: remove this after A/B test is done.
+    bool should_profile_driven_cluster_aux_subtable;
   };
   struct PerFieldOptions {
     // For presence awareness (e.g. PDProto).
@@ -63,6 +65,8 @@ struct PROTOBUF_EXPORT TailCallTableInfo {
                     const OptionProvider& option_provider,
                     const std::vector<int>& has_bit_indices,
                     const std::vector<int>& inlined_string_indices);
+
+  TcParseFunction fallback_function;
 
   // Fields parsed by the table fast-path.
   struct FastFieldInfo {
@@ -106,6 +110,7 @@ struct PROTOBUF_EXPORT TailCallTableInfo {
     kSubTable,
     kSubMessageWeak,
     kMessageVerifyFunc,
+    kSelfVerifyFunc,
     kEnumRange,
     kEnumValidator,
     kNumericOffset,

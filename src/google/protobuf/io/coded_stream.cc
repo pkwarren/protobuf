@@ -74,7 +74,7 @@ inline uint8_t* CopyCordToArray(const absl::Cord& cord, uint8_t* target) {
 // CodedInputStream ==================================================
 
 CodedInputStream::~CodedInputStream() {
-  if (input_ != NULL) {
+  if (input_ != nullptr) {
     BackUpInputToCurrentPosition();
   }
 }
@@ -200,7 +200,7 @@ bool CodedInputStream::SkipFallback(int count, int original_buffer_size) {
   }
 
   count -= original_buffer_size;
-  buffer_ = NULL;
+  buffer_ = nullptr;
   buffer_end_ = buffer_;
 
   // Make sure this skip doesn't try to skip past the current limit.
@@ -893,7 +893,7 @@ uint8_t* EpsCopyOutputStream::WriteAliasedRaw(const void* data, int size,
   }
 }
 
-#ifndef PROTOBUF_LITTLE_ENDIAN
+#ifndef ABSL_IS_LITTLE_ENDIAN
 uint8_t* EpsCopyOutputStream::WriteRawLittleEndian32(const void* data, int size,
                                                    uint8_t* ptr) {
   auto p = static_cast<const uint8_t*>(data);

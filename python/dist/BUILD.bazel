@@ -5,8 +5,9 @@
 # license that can be found in the LICENSE file or at
 # https://developers.google.com/open-source/licenses/bsd
 
-load("@rules_pkg//:mappings.bzl", "pkg_files", "strip_prefix")
-load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("@pip_deps//:requirements.bzl", "requirement")
+load("@rules_pkg//pkg:mappings.bzl", "pkg_files", "strip_prefix")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("@rules_python//python:packaging.bzl", "py_wheel")
 load("@system_python//:version.bzl", "SYSTEM_PYTHON_VERSION")
 load("//:protobuf_version.bzl", "PROTOBUF_PYTHON_VERSION")
@@ -216,7 +217,7 @@ pkg_files(
 
 pkg_files(
     name = "utf8_range_source_files",
-    srcs = ["@utf8_range//:utf8_range_srcs"],
+    srcs = ["//third_party/utf8_range:utf8_range_srcs"],
     prefix = "utf8_range",
 )
 
@@ -238,7 +239,6 @@ pkg_files(
         "//python:message_srcs",
         "//upb:source_files",
         "//upb/base:source_files",
-        "//upb/collections:source_files",
         "//upb/hash:source_files",
         "//upb/lex:source_files",
         "//upb/mem:source_files",
@@ -246,6 +246,7 @@ pkg_files(
         "//upb/mini_descriptor:source_files",
         "//upb/mini_table:source_files",
         "//upb/port:source_files",
+        "//upb/reflection:source_files",
         "//upb/text:source_files",
         "//upb/util:source_files",
         "//upb/wire:source_files",
@@ -280,6 +281,7 @@ genrule(
     srcs = [":source_tarball"],
     outs = ["protobuf-%s.tar.gz" % PROTOBUF_PYTHON_VERSION],
     cmd = """
+        export PYTHONPATH=$$PWD/external/pip_deps_setuptools/site-packages
         set -eux
         tar -xzvf $(location :source_tarball)
         cd protobuf/
@@ -291,6 +293,7 @@ genrule(
         "@system_python//:none": ["@platforms//:incompatible"],
         "//conditions:default": [],
     }),
+    tools = [requirement("setuptools")],
 )
 
 py_wheel(
@@ -309,6 +312,7 @@ py_wheel(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     distribution = "protobuf",
     extra_distinfo_files = {
@@ -364,6 +368,7 @@ py_wheel(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
     distribution = "protobuf",
     extra_distinfo_files = {
@@ -422,7 +427,6 @@ py_dist(
     name = "dist",
     binary_wheel = ":binary_wheel",
     full_api_cpus = [
-        # TODO: fix win32 build
         "win32",
         "win64",
     ],
@@ -438,7 +442,6 @@ py_dist(
     # 3.10, but on Linux we can get away with using 3.7 (see ../python_api.h for
     # details).
     limited_api_wheels = {
-        # TODO: fix win32 build
         "win32": "310",
         "win64": "310",
         "linux-x86_64": "38",

@@ -11,10 +11,14 @@
 
 #include "google/protobuf/compiler/code_generator.h"
 
+#include <cstddef>
+#include <string>
 #include <utility>
+#include <vector>
 
 #include "absl/log/absl_log.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "absl/strings/string_view.h"
@@ -23,11 +27,14 @@
 #include "google/protobuf/descriptor.h"
 #include "google/protobuf/feature_resolver.h"
 
+// Must be included last.
+#include "google/protobuf/port_def.inc"
+
 namespace google {
 namespace protobuf {
 namespace compiler {
 
-CodeGenerator::~CodeGenerator() {}
+CodeGenerator::~CodeGenerator() = default;
 
 bool CodeGenerator::GenerateAll(const std::vector<const FileDescriptor*>& files,
                                 const std::string& parameter,
@@ -36,7 +43,7 @@ bool CodeGenerator::GenerateAll(const std::vector<const FileDescriptor*>& files,
   // Default implementation is just to call the per file method, and prefix any
   // error string with the file to provide context.
   bool succeeded = true;
-  for (int i = 0; i < files.size(); i++) {
+  for (size_t i = 0; i < files.size(); i++) {
     const FileDescriptor* file = files[i];
     succeeded = Generate(file, parameter, generator_context, error);
     if (!succeeded && error && error->empty()) {
@@ -57,12 +64,20 @@ bool CodeGenerator::GenerateAll(const std::vector<const FileDescriptor*>& files,
 
 absl::StatusOr<FeatureSetDefaults> CodeGenerator::BuildFeatureSetDefaults()
     const {
+  if ((GetSupportedFeatures() & FEATURE_SUPPORTS_EDITIONS) == 0) {
+    // For generators that don't fully support editions yet, provide an
+    // optimistic set of defaults.  Protoc will check this condition later
+    // anyway.
+    return FeatureResolver::CompileDefaults(
+        FeatureSet::descriptor(), GetFeatureExtensions(),
+        PROTOBUF_MINIMUM_EDITION, PROTOBUF_MAXIMUM_EDITION);
+  }
   return FeatureResolver::CompileDefaults(
       FeatureSet::descriptor(), GetFeatureExtensions(), GetMinimumEdition(),
       GetMaximumEdition());
 }
 
-GeneratorContext::~GeneratorContext() {}
+GeneratorContext::~GeneratorContext() = default;
 
 io::ZeroCopyOutputStream* GeneratorContext::OpenForAppend(
     const std::string& filename) {
@@ -128,6 +143,13 @@ bool IsKnownFeatureProto(absl::string_view filename) {
   return false;
 }
 
+bool CanSkipEditionCheck(absl::string_view filename) {
+  return absl::StartsWith(filename, "google/protobuf/") ||
+         absl::StartsWith(filename, "upb/");
+}
+
 }  // namespace compiler
 }  // namespace protobuf
 }  // namespace google
+
+#include "google/protobuf/port_undef.inc"

@@ -5,12 +5,12 @@
 // license that can be found in the LICENSE file or at
 // https://developers.google.com/open-source/licenses/bsd
 
+#include "google/protobuf/descriptor.pb.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "google/protobuf/descriptor.h"
-#include "google/protobuf/descriptor.pb.h"
-#include "google/protobuf/editions/golden/test_messages_proto2.pb.h"
-#include "google/protobuf/editions/golden/test_messages_proto3.pb.h"
+#include "google/protobuf/editions/golden/test_messages_proto2_editions.pb.h"
+#include "google/protobuf/editions/golden/test_messages_proto3_editions.pb.h"
 #include "google/protobuf/editions/proto/test_editions_default_features.pb.h"
 #include "google/protobuf/test_textproto.h"
 
@@ -22,9 +22,9 @@ namespace protobuf {
 namespace {
 
 using ::protobuf_editions_test::EditionsDefaultMessage;
-using ::protobuf_test_messages::proto2::TestAllRequiredTypesProto2;
-using ::protobuf_test_messages::proto2::TestAllTypesProto2;
-using ::protobuf_test_messages::proto3::TestAllTypesProto3;
+using ::protobuf_test_messages::editions::proto2::TestAllRequiredTypesProto2;
+using ::protobuf_test_messages::editions::proto2::TestAllTypesProto2;
+using ::protobuf_test_messages::editions::proto3::TestAllTypesProto3;
 using ::testing::NotNull;
 
 TEST(Generated, Parsing) {
@@ -146,7 +146,7 @@ TEST(Generated, EditionDefaults2023InternalFeatures) {
                 utf8_validation: VERIFY
                 message_encoding: LENGTH_PREFIXED
                 json_format: ALLOW
-                [pb.cpp] { legacy_closed_enum: false }
+                [pb.cpp] { legacy_closed_enum: false string_type: STRING }
               )pb"));
 }
 
